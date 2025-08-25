@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: your-dockerhub-username/devops-demo-app
+  IMAGE_NAME: trunmhrshi/devops-demo-app
 
 jobs:
   test:
