@@ -7,6 +7,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # Checkout Repo
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -42,9 +43,19 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID:     ${{ secrets.AZURE_TENANT_ID }}
 
-      # Deploy to Kubernetes
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Apply Manifests
-        run: kubectl apply -f k8s/
+      # Deploy on Azure VM (Minikube + kubectl)
+      - name: Deploy to Azure VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_IP }}
+          username: azureuser
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            set -e
+            if [ ! -d "devops-pipeline-demo" ]; then
+              git clone https://github.com/${{ github.repository }}.git
+            fi
+            cd devops-pipeline-demo
+            git pull
+            kubectl apply -f k8s/
+            kubectl rollout status deployment/devops-demo-app -n devops-demo
